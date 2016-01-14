@@ -1,13 +1,104 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta charset="utf-8">
-		<title>Hello Word!</title>
-		<style>
-			h1{text-align:center;}
-		</style>
+		<meta charset="utf-8" />
+		<title>MyJob</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="Description" content="MyJob"/>
+		<meta name="Keywords" content="MyJob"/>
+		<meta name="format-detection" content="telephone=no"/>
+	<style type="text/css">
+		body,div,p,h1,h2,h3{margin:0;padding:0;}
+		body{background:#fff;font-family:"微软雅黑";font-size:14px;color:#555;}
+		.my-content{margin:60px 5% 0 10%;padding:0;width:85%;}
+		p{text-indent:10px;}
+		h1{display:block;position:fixed;top:0;left:5%;width:90%;height:50px;line-height:50px;text-align:center;font-size:26px;border-bottom:1px dotted #ed430f;background:#fff;}
+		.my-brief{margin:0;padding:0;width:100%;}
+		.my-brief>p{margin:0;padding:5px 0;height:20px;line-height:20px;width:100%;}
+		.my-brief>p>span{display:inline-block;width:80px;text-align:right;}
+		.my-job{margin:0;padding:0;width:100%;}
+		h2{margin:0 0 0 -5%;padding:0;height:30px;line-height:30px;font-size:18px;position:relative;}
+			h2::before{position:absolute;content:'';top:13px;left:-2px;width:3px;height:10px;background:#ed430f;}
+			h2::after{position:absolute;content:'';top:18px;left:3px;width:3px;height:5px;background:#ed430f;}
+			h2>span{margin:0 0 0 10px;padding:0 5px;display:inline-block;height:30px;border-bottom:1px dotted #cc6633;}
+		h3{margin:10px 0 0;padding:0;line-height:30px;font-size:14px;position:relative;text-indent:30px;}
+			/*h3:first-letter{font-size:20px;color:red;}*/
+			h3::before,h3::after{position:absolute;content:'';background:#cc3300;height:2px;color:#cc6633;font-weight:400;}
+			h3::before{top:8px;width:30px;height:2px;left:-8px;content:'ime';text-indent:10px;line-height:20px;font-size:12px;
+			transform: rotateZ(-10deg);
+			-moz-transform: rotateZ(-10deg);
+			-webkit-transform: rotateZ(-10deg);
+			font-family: times;font-weight: 100;}
+			h3::after{top:7px;width:2px;height:18px;left:-1px;
+			transform: rotateZ(-10deg);
+			-moz-transform: rotateZ(-10deg);
+			-webkit-transform: rotateZ(-10deg);}
+		.my-job .job-name{float:left;position:relative;width:100px;margin:0 -100px 0 0;}
+		.my-job .job-content{float:right;width:100%;}
+		/*.my-job .job-content>p{margin:0 0 0 110px;padding:5px 0;line-height:20px;}*/
+		.my-job>p{margin:0;padding:5px 0;line-height:20px;text-indent:20px;}
+		.my-self{margin:0;padding:0;width:100%;line-height:25px;text-indent:20px;}
+		@media only screen and (min-width:415px ) {
+			.my-content{margin:60px 20px 0 40px;width:354px;}
+		}
+		
+	</style>
 	</head>
 	<body>
-		<h1>Hello Word!</h1>
+		<h1>My Job</h1>
+		<div class="my-content">
+			<h2><span>个人简介：</span></h2>
+			<div class="my-brief">
+				<p><span>姓名：</span>翟燕乐</p>
+				<p><span>籍贯：</span>江苏连云港</p>
+				<p><span>毕业学校：</span>南京邮电大学</p>
+				<p><span>专业：</span>教育技术（传媒艺术学院）</p>
+				<p><span>邮箱：</span>516037580@163.com</p>
+				<p><span>联系方式：</span>15251837625</p>
+			</div>
+			<h2><span>自我介绍：</span></h2>
+				<p class="my-self">
+					开始在一家单位工作了近三年时间，没有项目只是自学，进步的很少，离开之后先后有几家单位，有一家创业单位倒闭了，个人喜欢充实有挑战性的工作，这样能学到很多东西，很充实。
+				</p>
+				<p class="my-self">
+					这一年来换了几份工作，离开都是为了更好的发展，学到更多，为了自己能起到更重要的作用，也有更可观的薪水。
+				</p>
+				<p class="my-self">
+					前端技术这一块，都是自己学习摸索的，看视频、看书、学习案例，ps,jquery,css3这些，一些框架angularjs、bootstrap也了解一些，因为没有机会用到项目中，理解的不是很深。
+				</p>
+			<h2><span>工作经历：</span></h2>
+			<div class="my-job">
+				<h3>2015-06--至今  江苏投吧金融信息服务有限公司</h3>
+				<p>岗位：前端工程师</p>
+				<p>主要负责公司网站的建设，wap端网站优化，app切图，app嵌套页面，推广活动页面</p>
+				<p>目前在职，想把更多的技术可以运用到项目中，因公司内部结构等问题考虑离职。</p>
+			</div>
+			<div class="my-job">
+				<h3>2015-01--2015-06  南京石头剪子布网络信息科技有限公司</h3>
+				<p>岗位：前端工程师</p>
+				<p>主要负责公司项目网站建设，微信端商城</p>
+				<p>这是一家创业公司，因公司资金问题，已关门。</p>
+			</div>
+			<div class="my-job">
+				<h3>2014-06--2015-01  HOUSE365</h3>
+				<p>岗位：前端工程师</p>
+				<p>主要负责公司移动端网站的改版页面，游戏活动等页面的前端工作</p>
+				<p>365是一家大型企业，公司制度很完善，前期在的部门有很多任务，刚接触移动端学到了不少经验，进步的很快。
+					后期部门调整好几个月无工作可做，所以申请离职。</p>
+			</div>
+			<div class="my-job">
+				<h3>2013-08--2014-06  南京金锟科技有限公司</h3>
+				<p>岗位：前端工程师</p>
+				<p>主要负责公司网站改版设计，pc端前端工作</p>
+				<p>完成了公司的网站改版和其他一些相关功能页面，因为公司只做自己的网站，很多空闲的时间，继续学习完善了相关知识，后来有移动端的机会，觉得很有挑战，所以选择离开。</p>
+			</div>
+			<div class="my-job">
+				<h3>2010-10--2013-08  南京市网上家长学校</h3>
+				<p>岗位：技术编辑，网页设计制作</p>
+				<p>主要负责公司后台发布，专辑页面设计制作</p>
+				<p>这是一家公益性质的单位，在此期间自学html,css,ps,jquery,js等前端基础知识。公司发展前景有限，最后选择离开。</p>
+			</div>
+		</div>
+		<br />
 	</body>
 </html>
