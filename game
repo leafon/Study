@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
+<meta content="yes" name="apple-mobile-web-app-capable">
+<meta content="black" name="apple-mobile-web-app-status-bar-style">
+<meta content="telephone=no" name="format-detection">
+<meta content="email=no" name="format-detection">
+<title>game</title>
+<style>
+* { margin: 0; padding: 0; }
+html, body { height: 100%; font-family:'Microsoft Yahei';}
+body { background: #000; background: url(image/gamebg.jpg) no-repeat center top;color:red;}
+canvas {display: block;cursor: crosshair;background:transparent;}
+#canvas{position:relative;z-index:10;}
+#game{position:fixed;z-index:20;top:0;left:0;width:100%;height:100%;display:none;
+background:url(image/gamebg.jpg) no-repeat;text-align:center;}
+.gamescore{
+  margin:40% 0 0 10%;width:80%;height:140px;border:1px solid #01add3;border-radius:10px;position:relative;text-align:center;
+  background:rgba(0,0,0,.2);
+}
+.scoretitle{position:absolute;top:-16px;left:50%;width:140px;height:32px;margin:0 0 0 -65px;background:url(image/scoretitle.png) no-repeat;background-size:130px 32px;}
+.scorecounts{margin:30px 0 0 0;color:#e35472;font-size:20px;line-height:30px;}
+.scoretip{line-height:30px;color:#cc4b66;font-size:12px;}
+.scorewards{margin:5px auto 0;width:190px; height:30px;color:#6492d0;line-height:30px;font-size:12px;
+  background:rgba(50,73,104,.3);border-radius:10px;}
+.counts{color:#e3c054;vertical-align:top;}
+.comeon{display:inline-block;margin:30px auto 0;width:130px;height:50px;}
+#count{margin:40px 0 0;text-align:center;}
+#start{position:fixed;top:50%;left:50%;margin:-55px 0 0 -65px;z-index:300;display:block;
+  width:130px;height:110px;background:url(image/start.png) no-repeat;background-size:130px 110px;}
+  .starttip{position:fixed;top:50%;left:50%;width:76%;margin:80px 0 0 -38%;height:30px;line-height:30px;text-align:center;
+    background:rgba(50,73,104,.3);color:#6492d0;border-radius:10px;}
+@media screen and (min-width:640){
+  body{margin:0 auto;width:640px;}
+}
+</style>
+</head>
+<body>
+<div id="start"></div>
+<p class="starttip">点击按钮开始挑战！GOGOGO!</p>
+<canvas id="canvas">Canvas is not supported by your browser.</canvas>
+<div id="game">
+  <div class="gamescore">
+    <p class="scoretitle"></p>
+    <h3 class="scorecounts">你的最终战绩是：<span id="gamescores" class="counts"></span></h3>
+    <p class="scoretip">(进入了前十哦！)</p>
+    <p class="scorewards">恭喜你获得了重量奖励：<span class="counts">10</span></p>
+  </div> 
+  <img class="comeon" id="comeon" src="image/comeon.png" />
+</div>
+<script src="../jquery-1.7.2.min.js" /></script>
+<script type="text/javascript"> 
+var options = {
+  startingHue: 120,
+  clickLimiter: 15,//出泡泡间隔,越小越快，难度越大
+}; 
+var fireworks = [];
+var particles = [];
+var mouse = {down: false, x: 0, y: 0};
+var gameflag = false;
+//var currentHue = options.startingHue;//默认数字
+var clickLimiterTick = 0;
+var timerTick = 0;
+var cntRocketsLaunched = 0;//击中的数量
+window.requestAnimFrame = (function(){
+  return window.requestAnimationFrame || 
+  window.webkitRequestAnimationFrame || 
+  window.mozRequestAnimationFrame || 
+  window.oRequestAnimationFrame || 
+  window.msRequestAnimationFrame || 
+  function( callback ){
+    window.setTimeout(callback, 1000 / 60);//定义每秒执行60次动画
+  };
+})();
+function random(min, max) {
+  return Math.random() * (max - min) + min;
+}
+function calculateDistance(p1x, p1y, p2x, p2y) {
+  var xDistance = p1x - p2x;
+  var yDistance = p1y - p2y;
+  return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
+}
+var canvas = document.getElementById('canvas');
+var canvasCtx = canvas.getContext('2d');
+var canvasWidth = window.innerWidth;
+var canvasHeight = window.innerHeight;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+var scoreImage = new Image();
+    scoreImage.src = "image/scorebg.png";
+var thornImage = new Image();
+    thornImage.src = "image/thorn1.png";
+var ccImage = new Image();
+    ccImage.src = "image/fly.png";
+var zdImage = new Image();
+    zdImage.src = "image/bullet.png";
+var hhImage = new Image();
+    hhImage.src = "image/blast.png";
+  var bgImage = new Image();
+      bgImage.src = "image/gamebg.jpg";
+var clearColor = 'rgba(0, 0, 0, 1)';
+var max = 30;
+var drops = [];
+var setupflag = true;
+var cli = document.getElementById("comeon");
+//游戏结束
+function randomthorn(){
+  thornImage.src = "image/thorn"+Math.ceil(Math.random()*3)+".png";
+}
+function Firework(sx, sy, tx, ty) {  
+  this.x = this.sx = sx;
+  this.y = this.sy = sy;
+  this.tx = tx; this.ty = ty;
+  this.distanceToTarget = calculateDistance(sx, sy, tx, ty);
+  this.distanceTraveled = 0;
+  this.coordinates = []; 
+  this.angle = Math.PI/2;//Math.atan2(ty - sy, tx - sx);
+};
+Firework.prototype.update = function(index) {
+  this.speed = 2;//*= this.acceleration;
+  var vx = Math.cos(-Math.PI/2) * this.speed;
+  var vy = Math.sin(-Math.PI/2) * this.speed;
+  var lx = canvasWidth/2;
+  var ly =  canvasWidth/2*Math.sin(-Math.PI/2)/Math.cos(-Math.PI/2);
+  this.distanceTraveled = calculateDistance(this.sx, this.sy, this.x + vx, this.y + vy);
+  //原点是：this.sx +":"+this.sy
+  if(Math.cos(this.angle)<0){
+    var distanceWh = calculateDistance(this.sx, this.sy,"-"+lx , ly);
+  }else{
+    var distanceWh = calculateDistance(this.sx, this.sy,lx , ly);
+  }
+  if(this.distanceTraveled >= distanceWh) { 
+      fireworks.splice(index/10, 1);//添加 
+  } else {
+    this.x += vx;
+    this.y += vy;
+  }
+};
+// Draws the firework
+Firework.prototype.draw = function() {
+  //======小球绘制
+  canvasCtx.drawImage(zdImage,this.x-5,this.y-5,10,10);
+}; 
+function Particle(sx, sy, tx, ty) {  
+  this.x = random(15,canvasWidth-15);//this.sx = sx;
+  this.y = 0;//this.sy = sy;
+  this.tx = tx; this.ty = ty; 
+  this.distanceToTarget = calculateDistance(sx, sy, tx, ty);
+  this.distanceTraveled = 0;
+  while(this.coordinateCount--) {
+    this.coordinates.push([this.x, this.y]);
+  }
+  this.angle = Math.PI/2;//Math.atan2(ty - sy, tx - sx);
+  this.speed = 2;//*= this.acceleration;
+ 
+};
+
+// This method should be called each frame to update the firework
+Particle.prototype.update = function(index) {
+  // Calculate the distance the firework has travelled so far (based on velocities)
+  if(cntRocketsLaunched < 20){
+    this.speed = 2;
+  }else if(cntRocketsLaunched <40 && cntRocketsLaunched>= 20){
+    this.speed = 3;
+  }else if(cntRocketsLaunched <60 && cntRocketsLaunched>= 40){
+    this.speed = 4;
+  }else if(cntRocketsLaunched <80 && cntRocketsLaunched>= 60){
+    this.speed = 5;
+  }else if(cntRocketsLaunched>= 80){
+    this.speed = 6;
+  }
+  var vx = Math.cos(-Math.PI/2) * this.speed;
+  var vy = Math.sin(-Math.PI/2) * this.speed;
+  var lx = canvasWidth/2;
+  var ly =  canvasWidth/2*Math.sin(-Math.PI/2)/Math.cos(-Math.PI/2);
+  this.distanceTraveled = calculateDistance(this.sx, this.sy, this.x + vx, this.y + vy);
+  //原点是：this.sx +":"+this.sy
+  if(Math.cos(this.angle)<0){
+    var distanceWh = calculateDistance(this.sx, this.sy,"-"+lx , ly);
+  }else{
+    var distanceWh = calculateDistance(this.sx, this.sy,lx , ly);
+  }
+  if(this.distanceTraveled >= distanceWh) {
+  } else {
+    this.x += vx;
+    this.y -= vy;
+  } 
+};
+// Draws the firework
+Particle.prototype.draw = function(i) { 
+  if(this.y >= canvasHeight){
+  //游戏结束==============================
+    document.getElementById("game").style.display ="block";
+    document.getElementById("gamescores").innerHTML = cntRocketsLaunched;
+    gameflag = true;
+    document.getElementById("game").style.display = "block";
+    return false;
+  }
+  var fi = fireworks.length;
+  while(fi--) {
+    if(this.y <= (fireworks[fi].y+15) && this.y >= (fireworks[fi].y-15) && this.x <= (fireworks[fi].x+15) && this.x >= (fireworks[fi].x-15) ){ 
+        fireworks.splice(fi,1);//碰撞后去掉发射的小球
+        particles.splice(i,1);//碰撞后去掉发射的小球 
+        cntRocketsLaunched++;
+        canvasCtx.drawImage(hhImage,this.x-20,this.y-20,40,40);
+    }
+  }
+  //======小球绘制
+  canvasCtx.drawImage(thornImage,this.x-10,this.y-10,20,20);
+}; 
+
+function createParticles(x, y) {
+  var particleCount = Math.round(random(options.particleMinCount, options.particleMaxCount));
+  while(particleCount--) {
+    particles.push(new Particle(x, y));
+  }
+}
+window.addEventListener('resize', function(e) {
+  canvas.width = canvasWidth = window.innerWidth;
+  canvas.height = canvasHeight = window.innerHeight;
+});
+canvas.addEventListener('touchstart', function(e) {
+  e.preventDefault();
+  var touch = e.touches[0]; //获取第一个触点
+  var x = Number(touch.pageX); //页面触点X坐标
+  var y = Number(touch.pageY); //页面触点Y坐标
+  mouse.x = x - canvas.offsetLeft;
+  mouse.y = y - canvas.offsetTop;
+});
+canvas.addEventListener('touchmove', function(e) {
+  e.preventDefault();
+  var touch = e.touches[0]; //获取第一个触点
+  var x = Number(touch.pageX); //页面触点X坐标
+  var y = Number(touch.pageY); //页面触点Y坐标
+  mouse.x = x - canvas.offsetLeft;
+  mouse.y = y - canvas.offsetTop;
+});
+canvas.addEventListener('touchend', function(e) {
+  e.preventDefault();
+});
+cli.addEventListener('touchend', function(e) {
+  e.preventDefault();
+})
+canvas.addEventListener('mouseup', function(e) {
+  e.preventDefault();
+});
+function gameLoop() {
+  if(gameflag){
+    return;
+  } 
+  window.requestAnimFrame(gameLoop); 
+  var startx = 0,starty = canvasHeight;
+  if(mouse.x == 0 || !mouse.x){
+    startx = canvasWidth / 2;
+  }else{
+    startx = mouse.x;
+  }
+  if(mouse.y == 0 || !mouse.y){
+    starty = canvasHeight-27;
+  }else{
+    starty = mouse.y;
+  } 
+  canvasCtx.fillStyle = 'rgba(0, 0, 0, 1)';
+  canvasCtx.fillRect(0, 0, canvasWidth, canvasHeight);
+  canvasCtx.drawImage(bgImage,0,0);
+  canvasCtx.drawImage(ccImage,startx-21,starty-27,42,54);
+  var i = fireworks.length;
+  while(i--) {
+    fireworks[i].draw();
+    fireworks[i].update(i);
+  }
+  var i = particles.length;
+  if(i>0){
+    while(i--) {
+      particles[i].draw(i);
+      try{ particles[i].update(i);}catch(e){}
+    }
+  }
+  // Draw some text
+  canvasCtx.fillStyle = '#e3c054';
+  canvasCtx.font = '14px Arial';
+  canvasCtx.drawImage(scoreImage,10,10,92,22);
+  canvasCtx.fillText(cntRocketsLaunched,75, 25);
+  timerTick++;
+  // Limit the rate at which fireworks can be spawned by mouse
+  if(clickLimiterTick >= options.clickLimiter) {
+      fireworks.push(new Firework(startx, starty-30, mouse.x, mouse.y));
+      clickLimiterTick = 0;
+      if(Math.ceil(timerTick/4)%3== 0){//数量
+        particles.push(new Particle(canvasWidth / 2-50, canvasHeight, mouse.x, mouse.y));
+      }
+  } else {
+    clickLimiterTick++;
+  }
+}
+document.getElementById("start").addEventListener('touchstart', function(e) {
+  document.getElementById("start").style.display = "none";
+  document.getElementsByClassName("starttip")[0].style.display = "none";
+  window.onload = gameLoop();
+  
+});
+document.getElementById("comeon").addEventListener('touchstart', function(e) {
+  document.getElementById("game").style.display = "none";
+  fireworks = [];
+  particles = [];
+  clickLimiterTick = 0;
+  timerTick = 0;
+  cntRocketsLaunched = 0;
+  gameflag = false;
+  window.onload = gameLoop();
+});
+</script>
+</body>
+</html>
